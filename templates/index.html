@@ -44,11 +44,11 @@
             </div>
             {% endfor %} {% endif %} {% endwith %}
 
-            <small class="mb-4">the Genesis Engine</small>
-            <h1 class="display-4 fw-bold">The Fraser Valley's First Coding Meetup</h1>
+            <small>the Genesis Engine</small>
+            <h1 class="display-4 fw-bold mt-3">Join The Fraser Valley's First Weekly Coding Meetup</h1>
             <p class="lead fs-4 mb-4">Fueling tomorrow's innovations 🚀</p>
 
-            <p>Join the Fraser Valleys first weekly coding meetup, enter your email to be notified when we launch!</p>
+            <p class="mt-5">Enter your email and we'll notify you when we launch!</p>
 
             <form action="{{ url_for('index') }}" method="POST" class="mt-4">
               <!-- Required for CSRF protection -->
@@ -61,6 +61,7 @@
                   placeholder="your.email@example.com"
                   aria-label="Email Address"
                   required
+                  autofocus
                 />
                 <button class="btn btn-custom btn-lg" type="submit">Notify Me</button>
               </div>
