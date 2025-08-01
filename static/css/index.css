@@ -1,0 +1,70 @@
+/* Define custom properties (variables) at the root level */
+:root {
+  --font-heading: "Montserrat", sans-serif;
+  --font-body: "Space Grotesk", sans-serif;
+  --color-accent-start: #ff8500; /* Brighter, vibrant orange */
+  --color-accent-end: #e83204;   /* Original deeper orange-red */
+}
+
+body,
+html {
+  height: 100%;
+  background-color: #1d1d1d;
+  color: white;
+  font-family: var(--font-body); /* Apply the body font by default */
+}
+
+/* Apply the heading font to all heading elements */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+}
+
+.main-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  text-align: center;
+}
+
+/* Custom button style */
+.btn-custom {
+  background-image: linear-gradient(to right, var(--color-accent-start), var(--color-accent-end));
+  background-size: 200% auto; /* Make the gradient larger than the button */
+  background-position: left center; /* Start with the left side of the gradient */
+  border: none;
+  color: #fff; /* Ensure text is white and readable */
+  transition: background-position 0.3s ease-in-out;
+}
+
+.btn-custom:hover {
+  background-position: right center; /* Slide the gradient to the right on hover */
+  color: #fff;
+}
+
+/* Ensure focus styles are also updated for accessibility */
+.btn-custom:focus, .btn-custom.focus {
+  /* Use one of the accent colors for the focus shadow */
+  box-shadow: 0 0 0 0.25rem rgba(232, 93, 4, 0.5);
+}
+
+/* Features Section Styling (spacing and borders are now handled by Bootstrap utilities in the HTML) */
+
+.feature-box {
+  background-color: #2a2a2a;
+  border-radius: 8px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.feature-box:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+}
+
+.feature-icon i {
+  background: linear-gradient(to right, var(--color-accent-start), var(--color-accent-end));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-fill-color: transparent;
+}

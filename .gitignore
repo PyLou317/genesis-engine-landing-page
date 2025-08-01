@@ -1,0 +1,25 @@
+# Environment variables
+# Never commit this file! It contains secrets.
+.env
+
+# Virtual Environment
+venv/
+env/
+*.env
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# IDE and editor configuration
+.idea/
+.vscode/
+*.swp
+
+# Application-generated data files
+emails.txt
+
+# OS-specific files
+.DS_Store
