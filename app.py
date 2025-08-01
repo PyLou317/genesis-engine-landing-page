@@ -2,7 +2,10 @@ import os
 import re
 import smtplib
 import ssl
+import gspread
 from email.message import EmailMessage
+from oauth2client.service_account import ServiceAccountCredentials
+from datetime import datetime
 
 from flask import Flask, render_template, request, flash, redirect, url_for
 from decouple import config
@@ -24,6 +27,36 @@ csrf = CSRFProtect(app)
 GMAIL_USER = config("GMAIL_USER", default=None)
 GMAIL_APP_PASSWORD = config("GMAIL_APP_PASSWORD", default=None)
 
+# --- Google Sheet Configuration from .env ---
+GOOGLE_SHEET_ID = config("GOOGLE_SHEET_ID")
+GOOGLE_CREDENTIALS_PATH = os.path.join(app.root_path, config("GOOGLE_CREDENTIALS_FILE", "credentials.json"))
+
+
+# --- Gspread Helper Function ---
+def add_email_to_sheet(email):
+    """Adds a timestamp and email to the Google Sheet."""
+    try:
+        scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+        creds = ServiceAccountCredentials.from_json_keyfile_name(GOOGLE_CREDENTIALS_PATH, scope)
+        client = gspread.authorize(creds)
+
+        sheet = client.open_by_key(GOOGLE_SHEET_ID).emails
+
+        # Check for duplicates before appending
+        emails_in_sheet = sheet.col_values(2)
+        if email in emails_in_sheet:
+            return "duplicate"
+
+        row = [str(datetime.now()), email]
+        sheet.append_row(row)
+        return "success"
+
+    except Exception as e:
+        print(f"Error adding email to Google Sheet: {e}")
+        return "error"
+    
+
+# --- Email Sending Function ---
 def send_confirmation_email(recipient_email):
     """
     Sends a confirmation email to the user using Gmail's SMTP server.
@@ -82,25 +115,38 @@ def index():
             flash("Please enter a valid email address.", "danger")
             return redirect(url_for("index"))
 
-        # --- Save Email to File ---
+        # --- Add Email to Google Sheet ---
         try:
-            existing_emails = set()
-            if os.path.exists(EMAIL_FILE):
-                with open(EMAIL_FILE, "r") as f:
-                    existing_emails = [line.strip() for line in f if line.strip()]
-                    
-            if email.strip() in existing_emails:
+            sheet_status = add_email_to_sheet(email)
+            if sheet_status == "duplicate":
                 flash("You're already registered for updates!", "warning")
                 return redirect(url_for("index"))
-                
-            # If not a duplicate, append the new email
-            with open(EMAIL_FILE, "a") as f:
-                f.write(email.strip() + "\n")
-                
-        except IOError as e:
-            print(f"Error writing to file: {e}")
+            elif sheet_status == "error":
+                flash("A server error occurred. Please try again later.", "danger")
+                return redirect(url_for("index"))
+        except:
             flash("A server error occurred. Please try again later.", "danger")
             return redirect(url_for("index"))
+        
+        # --- Save Email to File ---
+        # try:
+        #     existing_emails = set()
+        #     if os.path.exists(EMAIL_FILE):
+        #         with open(EMAIL_FILE, "r") as f:
+        #             existing_emails = [line.strip() for line in f if line.strip()]
+                    
+        #     if email.strip() in existing_emails:
+        #         flash("You're already registered for updates!", "warning")
+        #         return redirect(url_for("index"))
+                
+        #     # If not a duplicate, append the new email
+        #     with open(EMAIL_FILE, "a") as f:
+        #         f.write(email.strip() + "\n")
+                
+        # except IOError as e:
+        #     print(f"Error writing to file: {e}")
+        #     flash("A server error occurred. Please try again later.", "danger")
+        #     return redirect(url_for("index"))
 
         # --- Send Confirmation Email ---
         if send_confirmation_email(email):
