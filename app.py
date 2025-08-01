@@ -7,6 +7,7 @@ from email.message import EmailMessage
 from flask import Flask, render_template, request, flash, redirect, url_for
 from decouple import config
 from flask_wtf.csrf import CSRFProtect
+import certifi
 
 # File to store collected emails
 EMAIL_FILE = "emails.txt"
@@ -41,19 +42,19 @@ def send_confirmation_email(recipient_email):
 
     # --- Create the Email ---
     msg = EmailMessage()
-    msg["Subject"] = "Welcome to The Genesis Engine Meetup!"
+    msg["Subject"] = "Welcome to the Genesis Engine Meetup!"
     msg["From"] = GMAIL_USER
     msg["To"] = recipient_email
     msg.set_content(
-        "Thank you for your interest in The Genesis Engine!\n\n"
+        "Thank you for your interest in the Genesis Engine!\n\n"
         "We've received your registration and will keep you updated with news about our first meetup.\n\n"
-        "Best regards,\nThe Genesis Engine Team"
+        "Best regards,\nthe Genesis Engine Team"
     )
 
     # --- Send the Email ---
     try:
         # Create a secure SSL context
-        context = ssl.create_default_context()
+        context = ssl.create_default_context(cafile=certifi.where())
         with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:
             server.login(GMAIL_USER, GMAIL_APP_PASSWORD)
             server.send_message(msg)
