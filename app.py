@@ -7,8 +7,7 @@ import json
 import base64
 import io
 
-from google.oauth2.service_account import Credentials
-from google.oauth2.credentials import Credentials
+from google.oauth2 import service_account
 from email.message import EmailMessage
 from datetime import datetime
 
@@ -65,13 +64,14 @@ def add_email_to_sheet(email):
     try:
         # Decode the Base64 string back to bytes
         creds_bytes = base64.b64decode(GOOGLE_CREDENTIALS_B64)
+        print(creds_bytes)
         
         # Load the credentials from the decoded bytes in memory
         creds_dict = json.load(io.BytesIO(creds_bytes))
         
         scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
         # This is the line that was causing the error
-        creds = Credentials.from_service_account_info(creds_dict, scopes=scope)
+        creds = service_account.Credentials.from_service_account_info(creds_dict, scopes=scope)
         client = gspread.authorize(creds)
 
         sheet = client.open_by_key(GOOGLE_SHEET_ID).sheet1 # Use .sheet1 for the first sheet
