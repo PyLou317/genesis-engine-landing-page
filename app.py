@@ -7,14 +7,9 @@ import json
 import base64
 import io
 
-from google.auth.transport.requests import Request
+from google.oauth2.service_account import Credentials
 from google.oauth2.credentials import Credentials
-from google_auth_oauthlib.flow import InstalledAppFlow
-from googleapiclient.discovery import build
-from googleapiclient.errors import HttpError
-
 from email.message import EmailMessage
-from oauth2client.service_account import ServiceAccountCredentials
 from datetime import datetime
 
 from flask import Flask, render_template, request, flash, redirect, url_for
@@ -63,13 +58,9 @@ GOOGLE_CREDENTIALS_PATH = os.path.join(app.root_path, config("GOOGLE_CREDENTIALS
 # --- Gspread Helper Function ---
 def add_email_to_sheet(email):
     """Adds a timestamp and email to the Google Sheet."""
-    if not GOOGLE_CREDENTIALS_PATH:
-        print("Error: GOOGLE_CREDENTIALS_JSON not set in .env file.")
+    if not GOOGLE_CREDENTIALS_B64:
+        print("Error: GOOGLE_CREDENTIALS_B64 not set in .env file.")
         return "error"
-    
-    # ADD THIS LINE FOR DEBUGGING:
-    print(f"DEBUG: GOOGLE_CREDENTIALS_JSON content length: {len(GOOGLE_CREDENTIALS_PATH)}")
-    print(f"DEBUG: GOOGLE_CREDENTIALS_JSON content: {GOOGLE_CREDENTIALS_PATH}")
     
     try:
         # Decode the Base64 string back to bytes
@@ -83,7 +74,7 @@ def add_email_to_sheet(email):
         creds = Credentials.from_service_account_info(creds_dict, scopes=scope)
         client = gspread.authorize(creds)
 
-        sheet = client.open_by_key(GOOGLE_SHEET_ID).emails
+        sheet = client.open_by_key(GOOGLE_SHEET_ID).worksheet("emails")
         
         # Check for duplicates before appending
         emails_in_sheet = sheet.col_values(2)
