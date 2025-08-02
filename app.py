@@ -3,6 +3,7 @@ import re
 import smtplib
 import ssl
 import gspread
+# from google.oauth2.service_account import Credentials
 from email.message import EmailMessage
 from oauth2client.service_account import ServiceAccountCredentials
 from datetime import datetime
@@ -31,6 +32,22 @@ GMAIL_APP_PASSWORD = config("GMAIL_APP_PASSWORD", default=None)
 GOOGLE_SHEET_ID = config("GOOGLE_SHEET_ID")
 GOOGLE_CREDENTIALS_PATH = os.path.join(app.root_path, config("GOOGLE_CREDENTIALS_FILE", "credentials.json"))
 
+
+# def get_gspread_client():
+#     """Authenticates and returns a gspread client."""
+#     try:
+#         # Load the JSON string from the environment variable
+#         creds_json = json.loads(config("GOOGLE_CREDENTIALS_JSON"))
+        
+#         # Create credentials directly from the dictionary
+#         scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+#         creds = Credentials.from_service_account_info(creds_json, scopes=scope)
+        
+#         return gspread.authorize(creds)
+#     except Exception as e:
+#         print(f"Error authenticating with Google Sheets: {e}")
+#         return None
+    
 
 # --- Gspread Helper Function ---
 def add_email_to_sheet(email):
