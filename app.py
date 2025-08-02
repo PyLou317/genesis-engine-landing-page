@@ -3,7 +3,14 @@ import re
 import smtplib
 import ssl
 import gspread
-# from google.oauth2.service_account import Credentials
+import json
+
+from google.auth.transport.requests import Request
+from google.oauth2.credentials import Credentials
+from google_auth_oauthlib.flow import InstalledAppFlow
+from googleapiclient.discovery import build
+from googleapiclient.errors import HttpError
+
 from email.message import EmailMessage
 from oauth2client.service_account import ServiceAccountCredentials
 from datetime import datetime
@@ -30,6 +37,7 @@ GMAIL_APP_PASSWORD = config("GMAIL_APP_PASSWORD", default=None)
 
 # --- Google Sheet Configuration from .env ---
 GOOGLE_SHEET_ID = config("GOOGLE_SHEET_ID")
+GOOGLE_RANGE_NAME = config("GOOGLE_RANGE_NAME", default=None)
 GOOGLE_CREDENTIALS_PATH = os.path.join(app.root_path, config("GOOGLE_CREDENTIALS_FILE", "credentials.json"))
 
 
@@ -52,13 +60,19 @@ GOOGLE_CREDENTIALS_PATH = os.path.join(app.root_path, config("GOOGLE_CREDENTIALS
 # --- Gspread Helper Function ---
 def add_email_to_sheet(email):
     """Adds a timestamp and email to the Google Sheet."""
+    if not GOOGLE_CREDENTIALS_PATH:
+        print("Error: GOOGLE_CREDENTIALS_JSON not set in .env file.")
+        return "error"
+    
     try:
+        # Authenticate using credentials from environment variable
+        creds_dict = json.loads(GOOGLE_CREDENTIALS_PATH)
         scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-        creds = ServiceAccountCredentials.from_json_keyfile_name(GOOGLE_CREDENTIALS_PATH, scope)
+        creds = Credentials.from_service_account_info(creds_dict, scopes=scope)
         client = gspread.authorize(creds)
 
         sheet = client.open_by_key(GOOGLE_SHEET_ID).emails
-
+        
         # Check for duplicates before appending
         emails_in_sheet = sheet.col_values(2)
         if email in emails_in_sheet:
@@ -124,24 +138,16 @@ def index():
         email = request.form.get("email", "").strip()
 
         # --- Validation ---
-        if not email:
-            flash("Email address cannot be empty.", "danger")
-            return redirect(url_for("index"))
-
-        if not EMAIL_REGEX.match(email):
+        if not email or not EMAIL_REGEX.match(email):
             flash("Please enter a valid email address.", "danger")
             return redirect(url_for("index"))
 
         # --- Add Email to Google Sheet ---
-        try:
-            sheet_status = add_email_to_sheet(email)
-            if sheet_status == "duplicate":
-                flash("You're already registered for updates!", "warning")
-                return redirect(url_for("index"))
-            elif sheet_status == "error":
-                flash("A server error occurred. Please try again later.", "danger")
-                return redirect(url_for("index"))
-        except:
+        sheet_status = add_email_to_sheet(email)
+        if sheet_status == "duplicate":
+            flash("You're already registered for updates!", "warning")
+            return redirect(url_for("index"))
+        elif sheet_status == "error":
             flash("A server error occurred. Please try again later.", "danger")
             return redirect(url_for("index"))
         
