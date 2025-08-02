@@ -4,6 +4,8 @@ import smtplib
 import ssl
 import gspread
 import json
+import base64
+import io
 
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
@@ -37,6 +39,7 @@ GMAIL_APP_PASSWORD = config("GMAIL_APP_PASSWORD", default=None)
 
 # --- Google Sheet Configuration from .env ---
 GOOGLE_SHEET_ID = config("GOOGLE_SHEET_ID")
+GOOGLE_CREDENTIALS_B64 = config("GOOGLE_CREDENTIALS_B64")
 GOOGLE_RANGE_NAME = config("GOOGLE_RANGE_NAME", default=None)
 GOOGLE_CREDENTIALS_PATH = os.path.join(app.root_path, config("GOOGLE_CREDENTIALS_FILE", "credentials.json"))
 
@@ -69,8 +72,13 @@ def add_email_to_sheet(email):
     print(f"DEBUG: GOOGLE_CREDENTIALS_JSON content: {GOOGLE_CREDENTIALS_PATH}")
     
     try:
-        # Authenticate using credentials from environment variable
-        creds_dict = json.loads(GOOGLE_CREDENTIALS_PATH)
+        # Decode the Base64 string back to bytes
+        creds_bytes = base64.b64decode(GOOGLE_CREDENTIALS_B64)
+        
+        # Load the credentials from the decoded bytes
+        creds_dict = json.load(io.BytesIO(creds_bytes))
+        
+        
         scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
         creds = Credentials.from_service_account_info(creds_dict, scopes=scope)
         client = gspread.authorize(creds)
