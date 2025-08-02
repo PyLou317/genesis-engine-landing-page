@@ -59,23 +59,23 @@ GOOGLE_CREDENTIALS_PATH = os.path.join(app.root_path, config("GOOGLE_CREDENTIALS
 def add_email_to_sheet(email):
     """Adds a timestamp and email to the Google Sheet."""
     if not GOOGLE_CREDENTIALS_B64:
-        print("Error: GOOGLE_CREDENTIALS_B64 not set in .env file.")
+        print("Error: GOOGLE_CREDENTIALS_B64 not set.")
         return "error"
     
     try:
         # Decode the Base64 string back to bytes
         creds_bytes = base64.b64decode(GOOGLE_CREDENTIALS_B64)
         
-        # Load the credentials from the decoded bytes
+        # Load the credentials from the decoded bytes in memory
         creds_dict = json.load(io.BytesIO(creds_bytes))
         
-        
         scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+        # This is the line that was causing the error
         creds = Credentials.from_service_account_info(creds_dict, scopes=scope)
         client = gspread.authorize(creds)
 
-        sheet = client.open_by_key(GOOGLE_SHEET_ID).worksheet("emails")
-        
+        sheet = client.open_by_key(GOOGLE_SHEET_ID).sheet1 # Use .sheet1 for the first sheet
+
         # Check for duplicates before appending
         emails_in_sheet = sheet.col_values(2)
         if email in emails_in_sheet:
