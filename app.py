@@ -64,6 +64,10 @@ def add_email_to_sheet(email):
         print("Error: GOOGLE_CREDENTIALS_JSON not set in .env file.")
         return "error"
     
+    # ADD THIS LINE FOR DEBUGGING:
+    print(f"DEBUG: GOOGLE_CREDENTIALS_JSON content length: {len(GOOGLE_CREDENTIALS_PATH)}")
+    print(f"DEBUG: GOOGLE_CREDENTIALS_JSON content: {GOOGLE_CREDENTIALS_PATH}")
+    
     try:
         # Authenticate using credentials from environment variable
         creds_dict = json.loads(GOOGLE_CREDENTIALS_PATH)
