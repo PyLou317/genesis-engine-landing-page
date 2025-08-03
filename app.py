@@ -109,7 +109,7 @@ def send_confirmation_email(recipient_email):
 
         * **Find inspiration** for your next big idea by engaging with a diverse group of creators.
 
-        Our weekly sessions will be a chance to connect, collaborate, and push our projects forward. We'll send you more details about the first session shortly.
+        Our weekly sessions will be a chance to connect, collaborate, and push our projects forward.
 
         We're also exploring the possibility of holding **monthly sessions with speakers and experts in the field**. These sessions would provide an opportunity to dive deep into specific topics and learn from leaders in the industry.
 
