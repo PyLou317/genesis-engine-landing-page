@@ -6,7 +6,7 @@ import gspread
 import json
 import base64
 import io
-import time
+import textwrap
 
 from google.oauth2 import service_account
 from email.message import EmailMessage
@@ -38,22 +38,6 @@ GOOGLE_CREDENTIALS_B64 = config("GOOGLE_CREDENTIALS_B64")
 GOOGLE_RANGE_NAME = config("GOOGLE_RANGE_NAME", default=None)
 GOOGLE_CREDENTIALS_PATH = os.path.join(app.root_path, config("GOOGLE_CREDENTIALS_FILE", "credentials.json"))
 
-
-# def get_gspread_client():
-#     """Authenticates and returns a gspread client."""
-#     try:
-#         # Load the JSON string from the environment variable
-#         creds_json = json.loads(config("GOOGLE_CREDENTIALS_JSON"))
-        
-#         # Create credentials directly from the dictionary
-#         scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-#         creds = Credentials.from_service_account_info(creds_json, scopes=scope)
-        
-#         return gspread.authorize(creds)
-#     except Exception as e:
-#         print(f"Error authenticating with Google Sheets: {e}")
-#         return None
-    
 
 # --- Gspread Helper Function ---
 def add_email_to_sheet(email):
@@ -105,17 +89,47 @@ def send_confirmation_email(recipient_email):
         print("Error: GMAIL_USER and GMAIL_APP_PASSWORD not set in .env file.")
         # In a real app, you might want to log this error more formally
         return False
+    
+    
+    def generate_welcome_email():
+        email_content = f"""
+        # Welcome to Genesis Engine! 🚀
+
+        Hey there,
+
+        Thanks for signing up for the Genesis Engine Weekly Coding Group! We're thrilled to have you join our community.
+
+        The idea behind this group is to create a vibrant space for builders, developers, and creatives to come together and do something amazing: **build in public, learn from each other, and spark new ideas.**
+
+        We believe that sharing your work, no matter what stage it's in, is one of the best ways to grow. Here, you'll be able to:
+
+        * **Showcase what you're working on**, getting feedback and support from a community of your peers.
+
+        * **Learn new skills** and technologies by seeing how others are tackling their projects.
+
+        * **Find inspiration** for your next big idea by engaging with a diverse group of creators.
+
+        Our weekly sessions will be a chance to connect, collaborate, and push our projects forward. We'll send you more details about the first session shortly.
+
+        We're also exploring the possibility of holding **monthly sessions with speakers and experts in the field**. These sessions would provide an opportunity to dive deep into specific topics and learn from leaders in the industry.
+
+        We're gauging the level of interest in this group and would love to hear your thoughts. If you have any suggestions or ideas, please reply to this email and let us know!
+
+        In the meantime, feel free to introduce yourself! We can't wait to see what you'll create.
+
+        Best,
+        The Genesis Engine Team
+        """
+        # Using textwrap.dedent to remove the leading indentation from the multiline string.
+        return textwrap.dedent(email_content).strip()
+
 
     # --- Create the Email ---
     msg = EmailMessage()
-    msg["Subject"] = "Welcome to the Genesis Engine Meetup!"
+    msg["Subject"] = "Welcome to Genesis Engine! Let's Build Together 🚀"
     msg["From"] = GMAIL_USER
     msg["To"] = recipient_email
-    msg.set_content(
-        "Thank you for your interest in the Genesis Engine!\n\n"
-        "We've received your registration and will keep you updated with news about our first meetup.\n\n"
-        "Best regards,\nthe Genesis Engine Team"
-    )
+    msg.set_content(generate_welcome_email())
 
     # --- Send the Email ---
     try:
