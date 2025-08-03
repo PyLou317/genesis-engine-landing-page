@@ -170,26 +170,6 @@ def index():
         elif sheet_status == "error":
             flash("A server error occurred. Please try again later.", "danger")
             return redirect(url_for("index"))
-        
-        # --- Save Email to File ---
-        # try:
-        #     existing_emails = set()
-        #     if os.path.exists(EMAIL_FILE):
-        #         with open(EMAIL_FILE, "r") as f:
-        #             existing_emails = [line.strip() for line in f if line.strip()]
-                    
-        #     if email.strip() in existing_emails:
-        #         flash("You're already registered for updates!", "warning")
-        #         return redirect(url_for("index"))
-                
-        #     # If not a duplicate, append the new email
-        #     with open(EMAIL_FILE, "a") as f:
-        #         f.write(email.strip() + "\n")
-                
-        # except IOError as e:
-        #     print(f"Error writing to file: {e}")
-        #     flash("A server error occurred. Please try again later.", "danger")
-        #     return redirect(url_for("index"))
 
         # --- Send Confirmation Email ---
         if send_confirmation_email(email):
