@@ -79,8 +79,8 @@ h6 {
 @media (min-width: 992px) {
   .form-control {
     /* These are the key properties from form-control-lg */
-    padding: 1rem 1.25rem;
-    font-size: 1.25rem;
+    padding: .65rem;
+    font-size: 1.35rem;
     border-radius: 0.5rem;
   }
 }
