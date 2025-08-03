@@ -7,6 +7,7 @@ import json
 import base64
 import io
 import textwrap
+import markdown2
 
 from google.oauth2 import service_account
 from email.message import EmailMessage
@@ -73,6 +74,39 @@ def add_email_to_sheet(email):
         return "error"
     
 
+def generate_welcome_email():
+    email_content = f"""
+    # Welcome to Genesis Engine! 🚀
+
+    Hey there,
+
+    Thanks for signing up for the Genesis Engine Weekly Coding Group! We're thrilled to have you join our community.
+
+    The idea behind this group is to create a vibrant space for builders, developers, and creatives to come together and do something amazing: **build in public, learn from each other, and spark new ideas.**
+
+    We believe that sharing your work, no matter what stage it's in, is one of the best ways to grow. Here, you'll be able to:
+
+    * **Showcase what you're working on**, getting feedback and support from a community of your peers.
+
+    * **Learn new skills** and technologies by seeing how others are tackling their projects.
+
+    * **Find inspiration** for your next big idea by engaging with a diverse group of creators.
+
+    Our weekly sessions will be a chance to connect, collaborate, and push our projects forward.
+
+    We're also exploring the possibility of holding **monthly sessions with speakers and experts in the field**. These sessions would provide an opportunity to dive deep into specific topics and learn from leaders in the industry.
+
+    We're gauging the level of interest in this group and would love to hear your thoughts. If you have any suggestions or ideas, please reply to this email and let us know!
+
+    In the meantime, feel free to introduce yourself! We can't wait to see what you'll create.
+
+    Best,
+    The Genesis Engine Team
+    """
+    # Using textwrap.dedent to remove the leading indentation from the multiline string.
+    return textwrap.dedent(email_content).strip()
+
+
 # --- Email Sending Function ---
 def send_confirmation_email(recipient_email):
     """
@@ -89,50 +123,20 @@ def send_confirmation_email(recipient_email):
         print("Error: GMAIL_USER and GMAIL_APP_PASSWORD not set in .env file.")
         # In a real app, you might want to log this error more formally
         return False
-    
-    
-    def generate_welcome_email():
-        email_content = f"""
-        # Welcome to Genesis Engine! 🚀
-
-        Hey there,
-
-        Thanks for signing up for the Genesis Engine Weekly Coding Group! We're thrilled to have you join our community.
-
-        The idea behind this group is to create a vibrant space for builders, developers, and creatives to come together and do something amazing: **build in public, learn from each other, and spark new ideas.**
-
-        We believe that sharing your work, no matter what stage it's in, is one of the best ways to grow. Here, you'll be able to:
-
-        * **Showcase what you're working on**, getting feedback and support from a community of your peers.
-
-        * **Learn new skills** and technologies by seeing how others are tackling their projects.
-
-        * **Find inspiration** for your next big idea by engaging with a diverse group of creators.
-
-        Our weekly sessions will be a chance to connect, collaborate, and push our projects forward.
-
-        We're also exploring the possibility of holding **monthly sessions with speakers and experts in the field**. These sessions would provide an opportunity to dive deep into specific topics and learn from leaders in the industry.
-
-        We're gauging the level of interest in this group and would love to hear your thoughts. If you have any suggestions or ideas, please reply to this email and let us know!
-
-        In the meantime, feel free to introduce yourself! We can't wait to see what you'll create.
-
-        Best,
-        The Genesis Engine Team
-        """
-        # Using textwrap.dedent to remove the leading indentation from the multiline string.
-        return textwrap.dedent(email_content).strip()
-
 
     # --- Create the Email ---
-    msg = EmailMessage()
-    msg["Subject"] = "Welcome to Genesis Engine! Let's Build Together 🚀"
-    msg["From"] = GMAIL_USER
-    msg["To"] = recipient_email
-    msg.set_content(generate_welcome_email())
+    try:
+        plain_text_content = generate_welcome_email()
+        html_content = markdown2.markdown(plain_text_content)
+        
+        msg = EmailMessage()
+        msg["Subject"] = "Welcome to Genesis Engine! Let's Build Together 🚀"
+        msg["From"] = GMAIL_USER
+        msg["To"] = recipient_email
+        msg.set_content(plain_text_content)
+        msg.add_alternative(html_content, subtype="html")
 
     # --- Send the Email ---
-    try:
         # Create a secure SSL context
         context = ssl.create_default_context(cafile=certifi.where())
         with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:
