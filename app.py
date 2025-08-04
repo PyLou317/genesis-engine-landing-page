@@ -58,14 +58,17 @@ def add_email_to_sheet(email):
         creds = service_account.Credentials.from_service_account_info(creds_dict, scopes=scope)
         client = gspread.authorize(creds)
 
-        sheet = client.open_by_key(GOOGLE_SHEET_ID).sheet1 # Use .sheet1 for the first sheet
+        sheet = client.open_by_key(GOOGLE_SHEET_ID).sheet1
 
         # Check for duplicates before appending
         emails_in_sheet = sheet.col_values(2)
         if email in emails_in_sheet:
             return "duplicate"
 
-        row = [str(datetime.now()), email]
+        # Get the current date and time
+        now = datetime.now()
+        formatted_date = now.strftime("%Y-%m-%d")  
+        row = [formatted_date, email]
         sheet.append_row(row)
         return "success"
 
